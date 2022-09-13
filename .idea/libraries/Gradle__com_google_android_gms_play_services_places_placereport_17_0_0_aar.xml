@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="Gradle: com.google.android.gms:play-services-places-placereport:17.0.0@aar">
+    <CLASSES>
+      <root url="file://$USER_HOME$/developTools/gradle-7.2/caches/transforms-3/3b4ce5de0f6e94b452e92da3f27eb6f5/transformed/play-services-places-placereport-17.0.0/res" />
+      <root url="file://$USER_HOME$/developTools/gradle-7.2/caches/transforms-3/5e999ecbbc0aec1f454976a9cf3bd71c/transformed/play-services-places-placereport-17.0.0/res" />
+      <root url="file://$USER_HOME$/developTools/gradle-7.2/caches/transforms-3/5e999ecbbc0aec1f454976a9cf3bd71c/transformed/play-services-places-placereport-17.0.0/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/developTools/gradle-7.2/caches/transforms-3/5e999ecbbc0aec1f454976a9cf3bd71c/transformed/play-services-places-placereport-17.0.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/5e999ecbbc0aec1f454976a9cf3bd71c/transformed/play-services-places-placereport-17.0.0/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/5e999ecbbc0aec1f454976a9cf3bd71c/transformed/play-services-places-placereport-17.0.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/5e999ecbbc0aec1f454976a9cf3bd71c/transformed/play-services-places-placereport-17.0.0/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
