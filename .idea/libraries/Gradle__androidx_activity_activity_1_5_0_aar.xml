@@ -15,6 +15,7 @@
     <JAVADOC />
     <SOURCES>
       <root url="jar://$USER_HOME$/developTools/gradle-7.2/caches/modules-2/files-2.1/androidx.activity/activity/1.5.0/dcc2cf874dbc325a477a11f1791cc04018910a52/activity-1.5.0-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/androidx.activity/activity/1.5.0/dcc2cf874dbc325a477a11f1791cc04018910a52/activity-1.5.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

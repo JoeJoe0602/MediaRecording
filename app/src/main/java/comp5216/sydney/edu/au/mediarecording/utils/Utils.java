@@ -11,7 +11,7 @@ public class Utils {
 
 
     /***
-     * 是否是wifi
+     * Determine whether you are connected to Wi-Fi
      * @param context
      * @return
      */
@@ -27,10 +27,10 @@ public class Utils {
     }
 
     /**
-     * 对网络连接状态进行判断
-     * @return true, 可用； false， 不可用
+     * Determine the network connection status
+     * @param ctx
+     * @return true, available； false， unavailable
      */
-
     public static boolean isOpenNetwork(Context ctx) {
         ConnectivityManager connManager = (ConnectivityManager) ctx
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -43,7 +43,7 @@ public class Utils {
     }
 
     /**
-     * 存 文件上传状态的
+     * Save the file upload status
      * @param activity
      * @param documentId
      * @param sessionUri
@@ -56,7 +56,7 @@ public class Utils {
     }
 
     /**
-     * 读文件上传状态
+     *Read the file upload status
      * @param activity
      * @param documentId
      * @return
@@ -73,7 +73,7 @@ public class Utils {
     }
 
     /**
-     * 删除已完成的状态
+     * Delete completed status
      * @param activity
      * @param documentId
      */

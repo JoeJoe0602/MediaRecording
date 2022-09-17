@@ -15,6 +15,7 @@
     <JAVADOC />
     <SOURCES>
       <root url="jar://$USER_HOME$/developTools/gradle-7.2/caches/modules-2/files-2.1/androidx.core/core/1.8.0/6d9dc81a87506edbc4890ff898df98c709a79fdf/core-1.8.0-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/androidx.core/core/1.8.0/6d9dc81a87506edbc4890ff898df98c709a79fdf/core-1.8.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

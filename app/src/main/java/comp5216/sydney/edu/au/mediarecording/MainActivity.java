@@ -7,7 +7,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 
@@ -68,49 +67,50 @@ public class MainActivity extends AppCompatActivity {
 
     //Define variables
     public final String APP_TAG = "MediaRecording";
-
-    public String photoFileName = "photo.jpg";
-    public String videoFileName = "video.mp4";
-
-    // 视频或者图片的存储文件
-    private File file;
-
-    // collection 名称 表名
-    private String mFireStoreName = "media_info";
-
-    // adapter 数据
-    List<MediaInfo> items = new ArrayList<>();
-
     MediaAdapter mediaAdapter;
     ListView mListView;
     FloatingActionButton floatingActionButton;
 
-    //request codes  拍照，读照片、录像、读录像
+    //Rendering the data of the adapter
+    List<MediaInfo> items = new ArrayList<>();
+
+    //Set the format of the photo or video to be uploaded
+    public String photoFileName = "photo.jpg";
+    public String videoFileName = "video.mp4";
+
+    //Storage file for photos or videos
+    private File file;
+
+    //Set the table name of collection
+    private String mFireStoreName = "media_info";
+
+
+    //Request codes
     private static final int MY_PERMISSIONS_REQUEST_OPEN_CAMERA = 101;
     private static final int MY_PERMISSIONS_REQUEST_READ_PHOTOS = 102;
     private static final int MY_PERMISSIONS_REQUEST_RECORD_VIDEO = 103;
     private static final int MY_PERMISSIONS_REQUEST_READ_VIDEOS = 104;
 
 
-    // 权限类
+    //Define permission class
     MarshmallowPermission marshmallowPermission = new MarshmallowPermission(this);
 
-    // 定位的类
+    //Define location class
     FusedLocationProviderClient fusedLocationClient;
 
-    // 用户默认城市
+    //Set the default city for the user
     String currLocationAddress = "Sydney";
 
-    // Firebase storage
+    //Firebase storage
     FirebaseStorage storage = FirebaseStorage.getInstance();
 
-    // storage reference
+    //Storage reference
     StorageReference storageRef;
 
-    // firebase 数据库实例
+    //Initialize the Firebase Database
     FirebaseFirestore mFirebaseFirestore = FirebaseFirestore.getInstance();
 
-    // 上传任务集合
+    //Upload Task Set
     List<UploadTask> mUploadTaskList = new ArrayList<>();
 
     @Override
@@ -118,25 +118,33 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //获取页面元素
+        //Get the elements in the layout
         mListView = findViewById(R.id.listView);
 
+        //Read data from the database
         readFromDatabase();
 
+        //Render data
         mediaAdapter = new MediaAdapter(this, items);
         mListView.setAdapter(mediaAdapter);
+
         floatingActionButton = findViewById(R.id.fab);
 
 
-        // 获取用户位置
+        // Get the location of the user
         requestLocation();
 
-        // 事件监听
+        // set the event listener
         handler();
     }
 
 
+    /**
+     * set the event listener
+     */
     public void handler() {
+
+        //Pop up the floatingActionButton
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -144,9 +152,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Click the list item and trigger the event
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
                 Intent intent = new Intent(MainActivity.this, MediaShowActivity.class);
                 intent.putExtra("type", items.get(i).getType());
                 intent.putExtra("url", items.get(i).getUrl());
@@ -156,14 +166,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // 同步任务
+
+    /**
+     * Start Synchronization tasks
+     *
+     * @param mediaInfoList
+     */
     public void syncFireStorageTask(List<MediaInfo> mediaInfoList) {
 
-        // 1. 任务开始之前，  判断是否是wifi   省流
+        //Before the task starts, decide whether to connect to Wi-Fi so that you can achieve your goal of saving flow.
         if (!Utils.isWifiConnected(this)) {
             return;
         }
-        // 是否链接网络
+        // Determine whether the network is connected
         if (!Utils.isOpenNetwork(this)) {
             return;
         }
@@ -171,29 +186,30 @@ public class MainActivity extends AppCompatActivity {
         // Create a storage reference from our app
         storageRef = storage.getReference();
 
+
         for (MediaInfo mediaInfo :
                 mediaInfoList) {
-            /**
-             * 1.  已经上传完成的不进入到循环内
-             * 2.  判断上传百分比，  如果>0 <100  查找本地上传进度，  找不到再重新上传
-             * 3、 0 的    直接上传， 创建任务
-             */
+
+            // 1. Uploads that have been uploaded do not enter the loop
             if (mediaInfo.getSyncStatus() != 100) {
 
                 UploadTask uploadTask;
+
                 // File or Blob
                 Uri file = Uri.fromFile(new File(mediaInfo.getUrl()));
 
                 Uri sessionUri = Utils.readSharedPreferences(MainActivity.this, mediaInfo.getDocumentId());
+
+                //2. Check the upload percentage and if the upload percentage is greater than 0 and less than 100, check the local upload progress
                 if (mediaInfo.getSyncStatus() != 0 && sessionUri != null) {
-                    // sessionUri  从 缓存里面拿出来    继续上传
+                    // Take the sessionUri out of the cache and continue uploading
                     uploadTask = storageRef.putFile(file, new StorageMetadata.Builder().build(), sessionUri);
                 } else {
-                    // =0    新任务
+                    //if the upload percentage is 0，create a task and upload directly
                     uploadTask = storageRef.child(mediaInfo.getCity() + "/" + file.getLastPathSegment()).putFile(file);
                 }
 
-                // 加到任务
+                // Add the upload task
                 mUploadTaskList.add(uploadTask);
 
                 // Listen for state changes, errors, and completion of the upload.
@@ -201,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
 
-                        // 每上传完一部分内容之后， 存储进度    SharedPreferences
+                        //After uploading a portion of the content, store the progress
                         Uri sessionUri = taskSnapshot.getUploadSessionUri();
                         if (sessionUri != null) {
                             Utils.saveSharedPreferences(MainActivity.this, mediaInfo.getDocumentId(), sessionUri);
@@ -215,8 +231,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         // Handle successful uploads on complete
-                        // ...
-                        // 删除上传进度
+                        //Deleting Upload Progress
                         Utils.deleteSharedPreferences(MainActivity.this, mediaInfo.getDocumentId());
                         mediaInfo.setSyncStatus(100);
                         updateDataFromFireStore(mediaInfo);
@@ -228,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * 更新数据
+     * Update data from Firebase
      *
      * @param mediaInfo
      */
@@ -238,23 +253,21 @@ public class MainActivity extends AppCompatActivity {
         mFirebaseFirestore.collection(mFireStoreName).document(mediaInfo.getDocumentId()).update(mediaInfoMap);
     }
 
+
     /**
-     * 定位方法
-     * 1. 不使用谷歌地图api 是因为 只需要获取用户所在城市这一个简单功能，  就不需要引入全量谷歌地图 ， 减少包体积和代码量，    为了节能，谷歌地图占用资源较多
-     * 2. 谷歌地图   联网，  网络请求获取地址
-     * 目前的解决方案是不需要联网的，   gps 获取到经纬度，  内置方法反查城市
+     * Obtain the location
      */
     public void requestLocation() {
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // 动态请求位置信息
+            //Request location information dynamically
             Toast.makeText(this, "GPS or NETWORK error", Toast.LENGTH_SHORT).show();
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             return;
         }
 
-        // 初始化定位
+        // Initialize location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, new OnSuccessListener<Location>() {
@@ -264,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
                         if (location != null) {
                             // Logic to handle location object
                             Log.e(APP_TAG, location.getLatitude() + "," + location.getLongitude());
-                            // 坐标反查城市
+                            //Use coordinates to contrast cities
                             Geocoder gc = new Geocoder(MainActivity.this, Locale.getDefault());
                             try {
                                 List<Address> address = gc.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
@@ -279,7 +292,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // 查库
+    /**
+     * Read data from the database
+     */
     public void readFromDatabase() {
         mFirebaseFirestore.collection(mFireStoreName)
                 .get()
@@ -290,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
 
                             List<MediaInfo> mediaInfoList = new ArrayList<>();
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                // 查询到的数据转成  MediaInfo 对象
+                                //The queried data is converted to a MediaInfo object
                                 MediaInfo mediaInfo = JSON.parseObject(JSON.toJSONString(document.getData()), MediaInfo.class);
                                 mediaInfo.setDocumentId(document.getId());
                                 mediaInfoList.add(mediaInfo);
@@ -307,10 +322,18 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Build data
+     * @param url
+     * @param city
+     * @param type
+     * @param syncStatus
+     */
     public void buildData(String url, String city, Integer type, int syncStatus) {
-        //实例化对象
+
+        //Initialize objects
         MediaInfo mediaInfo = new MediaInfo();
-        //设置属性
+        //Set the attributes
         mediaInfo.setId(System.currentTimeMillis());
         mediaInfo.setUrl(url);
         mediaInfo.setCity(city);
@@ -325,11 +348,11 @@ public class MainActivity extends AppCompatActivity {
                     public void onSuccess(DocumentReference documentReference) {
                         Log.d(APP_TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
                         mediaInfo.setDocumentId(documentReference.getId());
-                        // 新的数据加到list 里面
+                        //Add the new data into the List
                         items.add(mediaInfo);
                         mediaAdapter.notifyDataSetChanged();
 
-                        // 新增一个同步任务
+                        //Add a synchronization task
                         List<MediaInfo> mediaInfoList = new ArrayList<>();
                         mediaInfoList.add(mediaInfo);
                         syncFireStorageTask(mediaInfoList);
@@ -343,6 +366,9 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Load the photo
+     */
     public void onLoadPhotoClick() {
         if (!marshmallowPermission.checkPermissionForReadfiles()) {
             marshmallowPermission.requestPermissionForReadfiles();
@@ -355,6 +381,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Load the video
+     */
     public void onLoadVideoClick() {
         if (!marshmallowPermission.checkPermissionForReadfiles()) {
             marshmallowPermission.requestPermissionForReadfiles();
@@ -367,6 +396,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Take the photo
+     */
     public void onTakePhotoClick() {
         // Check permissions
         if (!marshmallowPermission.checkPermissionForCamera()
@@ -392,6 +424,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Record the video
+     */
     public void onRecordVideoClick() {
         // Check permissions
         if (!marshmallowPermission.checkPermissionForCamera()
@@ -414,7 +449,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // 创建一个空的本地文件
+    /**
+     * Create an empty local file
+     * @param fileName
+     * @return
+     */
     public File createFile(String fileName) {
         File mediaStorageDir = new
                 File(getExternalFilesDir(Environment.getExternalStorageDirectory().toString()), "Utils");
@@ -429,7 +468,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // Returns the Uri for a photo/media stored on disk given the fileName
+    /**
+     * Return the Uri for a photo/media stored on disk given the fileName
+     * @param fileName
+     * @return
+     */
     public Uri getFileUri(String fileName) {
         Uri fileUri = null;
         try {
@@ -452,12 +495,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *
+     * Display the options about FloatingActionButton
      */
     private void showChoose() {
-        //    指定下拉列表的显示数据
+        //Specifies the data displayed in the drop-down list
         final String[] actions = {"Take Photo", "Load Photo", "Record Video", "Load Video"};
-        //    设置一个下拉的列表选择项
+        //Set a drop-down list selection
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this)
                 .setTitle("Please Pick one ？")
                 .setIcon(R.drawable.ic_launcher_background)
@@ -490,23 +533,30 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    /**
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MY_PERMISSIONS_REQUEST_OPEN_CAMERA) {
             if (resultCode == RESULT_OK) {
-                // 通过源文件，压缩成一个新的文件   webp 格式
+                // by this point we have the camera photo on disk
                 Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                // Through the source file, compressed into a new file WEBP format
                 bitmap.compress(Bitmap.CompressFormat.WEBP, 50, baos);
                 try {
-                    // 1. 创建文件
+                    //Create files
                     String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
                             Locale.getDefault()).format(new Date());
                     photoFileName = "IMG_" + timeStamp + ".webp";
                     createFile(photoFileName);
 
-                    // 压缩后的流，  写到创建的文件里
+                    //The compressed stream is written to the created file
                     FileOutputStream fos = new FileOutputStream(file);
                     fos.write(baos.toByteArray());
                     fos.flush();
@@ -516,7 +566,8 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-            } else { // Result was a failure
+            } else {
+                // Result was a failure
                 Toast.makeText(this, "Picture wasn't taken!",
                         Toast.LENGTH_SHORT).show();
             }
@@ -529,13 +580,13 @@ public class MainActivity extends AppCompatActivity {
 
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     bitmap.compress(Bitmap.CompressFormat.WEBP, 50, baos);
-                    // 1. 创建文件
+                    //Create files
                     String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
                             Locale.getDefault()).format(new Date());
                     photoFileName = "IMG_" + timeStamp + ".webp";
                     createFile(photoFileName);
 
-                    // 压缩后的流，  写到创建的文件里
+                    //The compressed stream is written to the created file
                     FileOutputStream fos = new FileOutputStream(file);
                     fos.write(baos.toByteArray());
                     fos.flush();
@@ -548,7 +599,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (requestCode == MY_PERMISSIONS_REQUEST_READ_VIDEOS) {
             if (resultCode == RESULT_OK) {
 
-                // 拿到视频的地址
+                //Get the url of the video
                 Uri selectedVideo = data.getData();
                 String[] filePathColumn = {MediaStore.Video.Media.DATA};
                 Cursor cursor = getContentResolver().query(selectedVideo,

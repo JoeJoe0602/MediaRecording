@@ -2,6 +2,7 @@ package comp5216.sydney.edu.au.mediarecording.entity;
 
 public class MediaInfo {
 
+    //Define the variables
     private  long id;
 
     private String documentId;

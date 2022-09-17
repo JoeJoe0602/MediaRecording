@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="comp5216.sydney.edu.au.mediarecording">
 
+    <!-- Always include this permission -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <!-- Always include this permission -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <!-- Include only if your app benefits from precise location access. -->
@@ -23,6 +23,7 @@
         <intent>
             <action android:name="android.intent.action.GET_CONTENT" />
         </intent>
+
     </queries>
 
     <application

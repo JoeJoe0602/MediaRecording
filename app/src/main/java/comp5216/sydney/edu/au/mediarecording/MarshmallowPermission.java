@@ -9,11 +9,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 /**
- * 权限申请类
+ * Permission Application Class
  */
 public class MarshmallowPermission {
 
-    // 定义权限码
+    //Define permission code
     public static final int RECORD_PERMISSION_REQUEST_CODE = 1;
     public static final int EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE = 2;
     public static final int CAMERA_PERMISSION_REQUEST_CODE = 3;
